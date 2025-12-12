@@ -1,0 +1,30 @@
+services:
+  api:
+    image: onion:api
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    ports:
+      - "1234:8000"
+    entrypoint: sleep infinity
+    volumes:
+      - ./:/app
+      - ~/.claude:/app/api/.claude
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: app
+    ports:
+      - "5432:5432"
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
