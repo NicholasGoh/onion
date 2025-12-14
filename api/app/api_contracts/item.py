@@ -5,26 +5,16 @@ from pydantic import BaseModel, Field
 fake = Faker()
 
 
-def _generate_item_name_examples() -> list[str]:
-    """Generate realistic item name examples using Faker"""
-    return [fake.catch_phrase() for _ in range(3)]
-
-
-def _generate_item_description_examples() -> list[str]:
-    """Generate realistic item description examples using Faker"""
-    return [fake.sentence(nb_words=8) for _ in range(3)]
-
-
 class ItemCreate(BaseModel):
     name: str = Field(
-        ...,
-        examples=_generate_item_name_examples(),
-        description="Name of the item"
+        default_factory=lambda: fake.word(),
+        examples=[fake.word() for _ in range(3)],
+        description="Name of the item",
     )
     description: str | None = Field(
-        None,
-        examples=_generate_item_description_examples(),
-        description="Optional description of the item"
+        default_factory=lambda: fake.sentence(),
+        examples=[fake.sentence() for _ in range(3)],
+        description="Optional description of the item",
     )
 
     def to_entities(self) -> ItemData:
@@ -32,16 +22,20 @@ class ItemCreate(BaseModel):
 
 
 class ItemRead(BaseModel):
-    id: int = Field(..., examples=[1], description="Unique identifier")
+    id: int = Field(
+        default_factory=lambda: fake.random_int(min=1, max=1000),
+        examples=[fake.random_int(min=1, max=1000) for _ in range(3)],
+        description="Unique identifier"
+    )
     name: str = Field(
-        ...,
-        examples=_generate_item_name_examples(),
-        description="Name of the item"
+        default_factory=lambda: fake.word(),
+        examples=[fake.word() for _ in range(3)],
+        description="Name of the item",
     )
     description: str | None = Field(
-        None,
-        examples=_generate_item_description_examples(),
-        description="Optional description of the item"
+        default_factory=lambda: fake.sentence(),
+        examples=[fake.sentence() for _ in range(3)],
+        description="Optional description of the item",
     )
 
     @classmethod
