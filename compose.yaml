@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: ./api/Dockerfile
     ports:
-      - "1234:8000"
+      - "8000:8000"
     entrypoint: bash -c "cd api && fastapi run --reload"
     volumes:
       - ./:/app
@@ -28,3 +28,15 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+
+  ui:
+    image: onion:ui
+    build:
+      context: .
+      dockerfile: ./ui/Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - ~/.claude:/app/.claude
