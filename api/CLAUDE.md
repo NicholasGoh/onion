@@ -13,13 +13,16 @@ app/
 │   ├── routes.py               #   Item routes
 │   ├── contracts.py            #   Item request/response DTOs
 │   ├── order_routes.py         #   Order routes
-│   └── order_contracts.py      #   Order request/response DTOs
+│   ├── order_contracts.py      #   Order request/response DTOs
+│   ├── tag_routes.py           #   Tag routes (pure CRUD, no custom service)
+│   └── tag_contracts.py        #   Tag request/response DTOs
 │
 ├── service/                    # Layer 2: Business Logic
 │   ├── __init__.py
 │   ├── crud_service.py         #   Generic CRUD (wraps IRepository)
 │   ├── item_service.py         #   Extends CrudService, adds validation + search
 │   └── order_service.py        #   Extends CrudService, couples with ItemService
+│                               #   (Tag uses CrudService directly — no TagService)
 │
 ├── data/                       # Layer 3: Data Access
 │   ├── __init__.py
@@ -29,7 +32,8 @@ app/
 │   └── infra/                  #   External implementations
 │       ├── __init__.py
 │       ├── repositories.py     #   Item SQLModel repository
-│       └── order_repository.py #   Order SQLModel repository
+│       ├── order_repository.py #   Order SQLModel repository
+│       └── tag_repository.py   #   Tag SQLModel repository
 │
 ├── container.py                # DI wiring
 └── main.py                     # FastAPI entry point

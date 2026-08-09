@@ -26,3 +26,14 @@ class Order:
 class OrderData:
     item_ids: list[int]
     quantity: dict[int, int]
+
+
+@dataclass
+class Tag:
+    id: int
+    name: str
+
+
+@dataclass
+class TagData:
+    name: str
