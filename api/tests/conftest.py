@@ -1,9 +1,16 @@
+import os
+
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine, StaticPool
+from sqlmodel import Session, SQLModel, create_engine
 
 from app.data.entities import Item, ItemData, Order, OrderData, Tag, TagData
 from app.data.interfaces import IRepository
+
+TEST_DATABASE_URL = os.getenv(
+    "TEST_DATABASE_URL",
+    "postgresql://postgres:postgres@localhost:5432/test_app",
+)
 
 
 # --- Fake repositories for unit tests ---
@@ -78,15 +85,13 @@ def item_repo_with_data():
 def client():
     import app.data.config as config
 
-    test_engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
+    test_engine = create_engine(TEST_DATABASE_URL, echo=True)
 
     original_engine = config.engine
-    original_get_session = config.get_session
     config.engine = test_engine
+
+    SQLModel.metadata.drop_all(test_engine)
+    SQLModel.metadata.create_all(test_engine)
 
     def get_test_session():
         with Session(test_engine) as session:
@@ -102,3 +107,5 @@ def client():
 
     container.db_session.reset_override()
     config.engine = original_engine
+    SQLModel.metadata.drop_all(test_engine)
+    test_engine.dispose()
