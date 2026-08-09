@@ -6,9 +6,26 @@ Python 3.13+ / FastAPI / SQLModel / dependency-injector / PostgreSQL.
 
 ```
 app/
-├── api/            # Layer 1: Presentation (routes + request/response contracts)
-├── service/        # Layer 2: Business logic (validation + orchestration)
-└── data/           # Layer 3: Data access (entities, interfaces, repositories, DB config)
+├── __init__.py
+│
+├── api/                    # Layer 1: Presentation
+│   ├── __init__.py         #   ↓
+│   ├── routes.py           #   ├─→ contracts
+│   └── contracts.py        #   └─→ data.entities
+│
+├── service/                # Layer 2: Business Logic
+│   ├── __init__.py         #   ↓
+│   └── item_service.py     #   └─→ data (entities + interfaces)
+│
+├── data/                   # Layer 3: Data Access
+│   ├── __init__.py         #
+│   ├── entities.py         #   Domain dataclasses (no deps)
+│   ├── interfaces.py       #   Repository ABCs (→ entities)
+│   ├── repositories.py     #   SQLModel implementation (→ interfaces, entities)
+│   └── config.py           #   DB engine + session
+│
+├── container.py            # DI wiring
+└── main.py                 # FastAPI entry point
 ```
 
 Dependencies flow inward: `api → service → data`. Never import from an outer layer.
