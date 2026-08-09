@@ -12,7 +12,7 @@ from app.service.order_service import OrderService
 class Container(containers.DeclarativeContainer):
 
     wiring_config = containers.WiringConfiguration(
-        modules=["app.api.routes", "app.api.order_routes", "app.api.tag_routes"]
+        modules=["app.api.items.routes", "app.api.orders.routes", "app.api.tags.routes"]
     )
 
     db_session = providers.Resource(get_session)

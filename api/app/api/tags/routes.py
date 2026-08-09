@@ -1,7 +1,7 @@
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.tag_contracts import TagCreate, TagRead
+from app.api.tags.contracts import TagCreate, TagRead
 from app.container import Container
 from app.data.entities import Tag, TagData
 from app.service.crud_service import CrudService

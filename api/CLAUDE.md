@@ -10,12 +10,15 @@ app/
 │
 ├── api/                        # Layer 1: Presentation
 │   ├── __init__.py
-│   ├── routes.py               #   Item routes
-│   ├── contracts.py            #   Item request/response DTOs
-│   ├── order_routes.py         #   Order routes
-│   ├── order_contracts.py      #   Order request/response DTOs
-│   ├── tag_routes.py           #   Tag routes (pure CRUD, no custom service)
-│   └── tag_contracts.py        #   Tag request/response DTOs
+│   ├── items/                  #   Grouped by domain
+│   │   ├── routes.py
+│   │   └── contracts.py
+│   ├── orders/
+│   │   ├── routes.py
+│   │   └── contracts.py
+│   └── tags/                   #   Pure CRUD, no custom service
+│       ├── routes.py
+│       └── contracts.py
 │
 ├── service/                    # Layer 2: Business Logic
 │   ├── __init__.py

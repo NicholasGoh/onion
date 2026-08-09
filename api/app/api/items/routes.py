@@ -1,7 +1,7 @@
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException
 
-from app.api.contracts import ItemCreate, ItemRead
+from app.api.items.contracts import ItemCreate, ItemRead
 from app.container import Container
 from app.service.item_service import ItemService
 
