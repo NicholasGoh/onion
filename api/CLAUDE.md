@@ -15,7 +15,8 @@ app/
 │
 ├── service/                # Layer 2: Business Logic
 │   ├── __init__.py         #   ↓
-│   └── item_service.py     #   └─→ data (entities + interfaces)
+│   ├── crud_service.py     #   Generic CRUD (wraps IRepository)
+│   └── item_service.py     #   Extends CrudService, adds validation + search
 │
 ├── data/                   # Layer 3: Data Access
 │   ├── __init__.py         #

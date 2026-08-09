@@ -1,18 +1,27 @@
 from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
 
-from app.data.entities import Item, ItemData
+T = TypeVar("T")
+TCreate = TypeVar("TCreate")
 
 
-class IItemRepository(ABC):
+class IRepository(ABC, Generic[T, TCreate]):
 
     @abstractmethod
-    def create(self, item_data: ItemData) -> Item:
+    def create(self, data: TCreate) -> T:
         pass
 
     @abstractmethod
-    def get_by_id(self, item_id: int) -> Item | None:
+    def get_by_id(self, id: int) -> T | None:
         pass
 
     @abstractmethod
-    def get_all(self) -> list[Item]:
+    def get_all(self) -> list[T]:
         pass
+
+    @abstractmethod
+    def delete(self, id: int) -> bool:
+        pass
+
+
+IItemRepository = IRepository["Item", "ItemData"]
