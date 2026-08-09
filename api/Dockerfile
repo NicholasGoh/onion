@@ -10,6 +10,6 @@ USER user
 WORKDIR /opt/venv
 
 COPY ./api/uv.lock ./api/pyproject.toml ./
-RUN uv sync --frozen && rm ./uv.lock ./pyproject.toml
+RUN uv sync --frozen --dev && rm ./uv.lock ./pyproject.toml
 COPY ./api /app
 WORKDIR /app

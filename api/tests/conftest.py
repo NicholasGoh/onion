@@ -9,18 +9,19 @@ from app.data.interfaces import IRepository
 
 TEST_DATABASE_URL = os.getenv(
     "TEST_DATABASE_URL",
-    "postgresql://postgres:postgres@localhost:5432/test_app",
+    "postgresql://postgres:postgres@postgres:5432/test_app",
 )
 
 
 # --- Fake repositories for unit tests ---
+
 
 class FakeRepository(IRepository):
 
     def __init__(self, items=None):
         self._items: dict[int, any] = {}
         self._next_id = 1
-        for item in (items or []):
+        for item in items or []:
             self._items[self._next_id] = item
             self._next_id += 1
 
@@ -73,18 +74,42 @@ def item_repo():
 @pytest.fixture
 def item_repo_with_data():
     repo = FakeItemRepository()
-    repo.create(ItemData(name="Bluetooth Speaker", description="Portable audio"))
+    repo.create(
+        ItemData(name="Bluetooth Speaker", description="Portable audio")
+    )
     repo.create(ItemData(name="USB Cable", description="Type-C charging cable"))
-    repo.create(ItemData(name="Blue Light Glasses", description="Screen filter"))
+    repo.create(
+        ItemData(name="Blue Light Glasses", description="Screen filter")
+    )
     return repo
 
 
 # --- Integration test fixtures ---
 
+
+def _ensure_database_exists(url: str) -> None:
+    from sqlalchemy import text
+    from sqlalchemy.engine import make_url
+
+    target = make_url(url)
+    admin_engine = create_engine(target.set(database="postgres"))
+    with admin_engine.connect() as conn:
+        conn.execute(text("COMMIT"))
+        exists = conn.execute(
+            text("SELECT 1 FROM pg_database WHERE datname = :name"),
+            {"name": target.database},
+        ).first()
+        if not exists:
+            conn.execute(text("COMMIT"))
+            conn.execute(text(f'CREATE DATABASE "{target.database}"'))
+    admin_engine.dispose()
+
+
 @pytest.fixture
 def client():
     import app.data.config as config
 
+    _ensure_database_exists(TEST_DATABASE_URL)
     test_engine = create_engine(TEST_DATABASE_URL, echo=True)
 
     original_engine = config.engine
@@ -98,6 +123,7 @@ def client():
             yield session
 
     from dependency_injector import providers
+
     from app.main import app, container
 
     container.db_session.override(providers.Resource(get_test_session))
