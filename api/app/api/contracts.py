@@ -1,4 +1,4 @@
-from app.entities.item import Item, ItemData
+from app.data.entities import Item, ItemData
 from faker import Faker
 from pydantic import BaseModel, Field
 
@@ -17,7 +17,7 @@ class ItemCreate(BaseModel):
         description="Optional description of the item",
     )
 
-    def to_entities(self) -> ItemData:
+    def to_entity(self) -> ItemData:
         return ItemData(name=self.name, description=self.description)
 
 
@@ -39,5 +39,5 @@ class ItemRead(BaseModel):
     )
 
     @classmethod
-    def from_entities(cls, item: Item) -> "ItemRead":
+    def from_entity(cls, item: Item) -> "ItemRead":
         return cls(id=item.id, name=item.name, description=item.description)
