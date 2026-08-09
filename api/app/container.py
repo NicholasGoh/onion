@@ -1,7 +1,7 @@
 from dependency_injector import containers, providers
 
 from app.data.config import get_session
-from app.data.repositories import ItemRepository
+from app.data.infra.repositories import ItemRepository
 from app.service.item_service import ItemService
 
 

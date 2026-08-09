@@ -20,9 +20,11 @@ app/
 ├── data/                   # Layer 3: Data Access
 │   ├── __init__.py         #
 │   ├── entities.py         #   Domain dataclasses (no deps)
-│   ├── interfaces.py       #   Repository ABCs (→ entities)
-│   ├── repositories.py     #   SQLModel implementation (→ interfaces, entities)
-│   └── config.py           #   DB engine + session
+│   ├── interfaces.py       #   ABCs for all external dependencies
+│   ├── config.py           #   DB engine + session
+│   └── infra/              #   External implementations
+│       ├── __init__.py     #
+│       └── repositories.py #   SQLModel repository
 │
 ├── container.py            # DI wiring
 └── main.py                 # FastAPI entry point
