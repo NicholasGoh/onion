@@ -1,26 +1,30 @@
 from dependency_injector import containers, providers
 
-from app.business.item_domain import ItemDomain
-from app.database.config import get_session
-from app.database.item import ItemRepository
-from app.orchestration.item_service import ItemService
+from app.data.config import get_session
+from app.data.item_repository import ItemRepository
+from app.data.order_repository import OrderRepository
+from app.data.tag_repository import TagRepository
+from app.service.crud_service import CrudService
+from app.service.item_service import ItemService
+from app.service.order_service import OrderService
 
 
 class Container(containers.DeclarativeContainer):
-    """DI Container for the application"""
 
-    wiring_config = containers.WiringConfiguration(modules=["app.routers.items"])
+    wiring_config = containers.WiringConfiguration(
+        modules=["app.api.items.routes", "app.api.orders.routes", "app.api.tags.routes"]
+    )
 
-    # Database
     db_session = providers.Resource(get_session)
 
-    # Business
-    item_domain = providers.Singleton(ItemDomain)
-
-    # Repositories
     item_repository = providers.Factory(ItemRepository, session=db_session)
+    order_repository = providers.Factory(OrderRepository, session=db_session)
+    tag_repository = providers.Factory(TagRepository, session=db_session)
 
-    # Services
-    item_service = providers.Factory(
-        ItemService, repository=item_repository, domain=item_domain
+    item_service = providers.Factory(ItemService, repository=item_repository)
+    order_service = providers.Factory(
+        OrderService,
+        repository=order_repository,
+        item_service=item_service,
     )
+    tag_service = providers.Factory(CrudService, repository=tag_repository)

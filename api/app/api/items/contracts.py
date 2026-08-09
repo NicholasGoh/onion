@@ -1,11 +1,12 @@
-from app.entities.item import Item, ItemData
+from app.api.base import CamelModel
+from app.data.entities import Item, ItemData
 from faker import Faker
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 fake = Faker()
 
 
-class ItemCreate(BaseModel):
+class ItemCreate(CamelModel):
     name: str = Field(
         default_factory=lambda: fake.word(),
         examples=[fake.word() for _ in range(3)],
@@ -17,11 +18,11 @@ class ItemCreate(BaseModel):
         description="Optional description of the item",
     )
 
-    def to_entities(self) -> ItemData:
+    def to_entity(self) -> ItemData:
         return ItemData(name=self.name, description=self.description)
 
 
-class ItemRead(BaseModel):
+class ItemRead(CamelModel):
     id: int = Field(
         default_factory=lambda: fake.random_int(min=1, max=1000),
         examples=[fake.random_int(min=1, max=1000) for _ in range(3)],
@@ -39,5 +40,5 @@ class ItemRead(BaseModel):
     )
 
     @classmethod
-    def from_entities(cls, item: Item) -> "ItemRead":
+    def from_entity(cls, item: Item) -> "ItemRead":
         return cls(id=item.id, name=item.name, description=item.description)

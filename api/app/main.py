@@ -1,22 +1,24 @@
 from fastapi import FastAPI
 
+from app.api.items import routes as item_routes
+from app.api.orders import routes as order_routes
+from app.api.tags import routes as tag_routes
 from app.container import Container
-from app.database.config import create_db_and_tables
-from app.routers import items
+from app.data.config import create_db_and_tables
 
-# Initialize DI container
 container = Container()
-container.wire(modules=["app.routers.items"])
+container.wire(modules=["app.api.items.routes", "app.api.orders.routes", "app.api.tags.routes"])
 
 app = FastAPI()
 app.container = container
 
-app.include_router(items.router)
+app.include_router(item_routes.router)
+app.include_router(order_routes.router)
+app.include_router(tag_routes.router)
 
 
 @app.on_event("startup")
 def on_startup():
-    """Initialize database tables on startup"""
     create_db_and_tables()
 
 

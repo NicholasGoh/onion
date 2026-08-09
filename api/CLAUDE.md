@@ -1,0 +1,46 @@
+# API
+
+Python 3.13+ / FastAPI / SQLModel / dependency-injector / PostgreSQL.
+
+## Architecture — 3 layers
+
+```
+app/
+├── __init__.py
+│
+├── api/                        # Layer 1: Presentation
+│   ├── __init__.py
+│   ├── items/                  #   Grouped by domain
+│   │   ├── routes.py
+│   │   └── contracts.py
+│   ├── orders/
+│   │   ├── routes.py
+│   │   └── contracts.py
+│   └── tags/                   #   Pure CRUD, no custom service
+│       ├── routes.py
+│       └── contracts.py
+│
+├── service/                    # Layer 2: Business Logic
+│   ├── __init__.py
+│   ├── crud_service.py         #   Generic CRUD (wraps IRepository)
+│   ├── item_service.py         #   Extends CrudService, adds validation + search
+│   └── order_service.py        #   Extends CrudService, couples with ItemService
+│                               #   (Tag uses CrudService directly — no TagService)
+│
+├── data/                       # Layer 3: Data Access
+│   ├── __init__.py
+│   ├── entities.py             #   Domain dataclasses (no deps)
+│   ├── interfaces.py           #   Generic IRepository ABC
+│   ├── config.py               #   DB engine + session
+│   ├── item_repository.py      #   Item SQLModel repository
+│   ├── order_repository.py     #   Order SQLModel repository
+│   ├── tag_repository.py       #   Tag SQLModel repository
+│   └── infra/                  #   Reserved for external clients (LLM, Gitea, etc.)
+│
+├── container.py                # DI wiring
+└── main.py                     # FastAPI entry point
+```
+
+Dependencies flow inward: `api → service → data`. Never import from an outer layer.
+
+Services may depend on other services for cross-entity orchestration (e.g. OrderService → ItemService to validate item existence). These couplings are wired through DI, never direct instantiation.
