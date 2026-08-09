@@ -21,18 +21,6 @@ def create_item(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/{item_id}", response_model=ItemRead)
-@inject
-def get_item(
-    item_id: int,
-    service: ItemService = Depends(Provide[Container.item_service]),
-):
-    domain_item = service.get(item_id)
-    if not domain_item:
-        raise HTTPException(status_code=404, detail="Item not found")
-    return ItemRead.from_entity(domain_item)
-
-
 @router.get("/", response_model=list[ItemRead])
 @inject
 def get_items(
@@ -50,3 +38,15 @@ def search_items(
 ):
     domain_items = service.search(q)
     return [ItemRead.from_entity(item) for item in domain_items]
+
+
+@router.get("/{item_id}", response_model=ItemRead)
+@inject
+def get_item(
+    item_id: int,
+    service: ItemService = Depends(Provide[Container.item_service]),
+):
+    domain_item = service.get(item_id)
+    if not domain_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return ItemRead.from_entity(domain_item)

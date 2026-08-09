@@ -1,8 +1,12 @@
 import pytest
+from fastapi.testclient import TestClient
+from sqlmodel import Session, SQLModel, create_engine, StaticPool
 
 from app.data.entities import Item, ItemData, Order, OrderData, Tag, TagData
 from app.data.interfaces import IRepository
 
+
+# --- Fake repositories for unit tests ---
 
 class FakeRepository(IRepository):
 
@@ -66,3 +70,35 @@ def item_repo_with_data():
     repo.create(ItemData(name="USB Cable", description="Type-C charging cable"))
     repo.create(ItemData(name="Blue Light Glasses", description="Screen filter"))
     return repo
+
+
+# --- Integration test fixtures ---
+
+@pytest.fixture
+def client():
+    import app.data.config as config
+
+    test_engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+
+    original_engine = config.engine
+    original_get_session = config.get_session
+    config.engine = test_engine
+
+    def get_test_session():
+        with Session(test_engine) as session:
+            yield session
+
+    from dependency_injector import providers
+    from app.main import app, container
+
+    container.db_session.override(providers.Resource(get_test_session))
+
+    with TestClient(app) as c:
+        yield c
+
+    container.db_session.reset_override()
+    config.engine = original_engine
