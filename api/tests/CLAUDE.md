@@ -1,10 +1,8 @@
 # API Tests
 
-Inherits `tests/CLAUDE.md`.
+Test the service layer for validation, search, and orchestration logic. Test the data layer only when a repository contains custom query logic. Test the api layer for contract serialization and error codes. Don't test inside a layer to verify the framework still works.
 
-Tests belong at layer boundaries — where we made a decision (a mapping, a validation rule, an error code). They don't belong inside a layer verifying that the framework we delegated to still works.
-
-## Wasteful vs worth it
+## Examples
 
 **Wasteful** — retests SQLModel:
 ```python
