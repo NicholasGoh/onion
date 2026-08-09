@@ -3,11 +3,16 @@ name = "onion"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.11"
 dependencies = [
     "dependency-injector>=4.48.3",
     "faker>=33.1.0",
     "fastapi[standard]>=0.124.2",
     "psycopg2-binary>=2.9.10",
     "sqlmodel>=0.0.27",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
 ]
