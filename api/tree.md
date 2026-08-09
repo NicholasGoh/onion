@@ -2,30 +2,22 @@
 app/
 ├── __init__.py
 │
-├── routers/                # Layer 1: Presentation
+├── api/                    # Layer 1: Presentation
 │   ├── __init__.py         #   ↓
-│   └── items.py            #   ├─→ api_contracts
-│                           #   └─→ orchestration
+│   ├── routes.py           #   ├─→ contracts
+│   └── contracts.py        #   └─→ data.entities
 │
-├── api_contracts/          # Layer 2: DTOs
+├── service/                # Layer 2: Business Logic
 │   ├── __init__.py         #   ↓
-│   └── item.py             #   └─→ entities
-│                           #
-├── orchestration/          # Layer 3: Workflow coordination
-│   ├── __init__.py         #   ↓
-│   └── item_service.py     #   ├─→ business
-│                           #   └─→ entities
+│   └── item_service.py     #   └─→ data (entities + interfaces)
 │
-├── business/               # Layer 4: DDD Rules and Validations
-│   ├── __init__.py         #   ↓
-│   └── item_domain.py      #   └─→ entities
-│                           #
-├── entities/               # Layer 5: Domain Models + Interfaces
-│   ├── __init__.py         #   ↑
-│   ├── item.py             #   ↑
-│   └── interfaces.py       #   ↑
-│                           #   ↑
-└── database/               # Layer 6: ORM
-    ├── __init__.py         #   └─→ entities (implements interfaces)
-    └── item.py
+├── data/                   # Layer 3: Data Access
+│   ├── __init__.py         #
+│   ├── entities.py         #   Domain dataclasses (no deps)
+│   ├── interfaces.py       #   Repository ABCs (→ entities)
+│   ├── repositories.py     #   SQLModel implementation (→ interfaces, entities)
+│   └── config.py           #   DB engine + session
+│
+├── container.py            # DI wiring
+└── main.py                 # FastAPI entry point
 ```
