@@ -1,5 +1,5 @@
 from app.container import Container
-from app.data.infra.repositories import ItemRepository
+from app.data.item_repository import ItemRepository
 from app.service.item_service import ItemService
 
 

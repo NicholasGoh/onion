@@ -1,9 +1,9 @@
 from dependency_injector import containers, providers
 
 from app.data.config import get_session
-from app.data.infra.order_repository import OrderRepository
-from app.data.infra.repositories import ItemRepository
-from app.data.infra.tag_repository import TagRepository
+from app.data.item_repository import ItemRepository
+from app.data.order_repository import OrderRepository
+from app.data.tag_repository import TagRepository
 from app.service.crud_service import CrudService
 from app.service.item_service import ItemService
 from app.service.order_service import OrderService

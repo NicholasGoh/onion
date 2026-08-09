@@ -32,11 +32,10 @@ app/
 │   ├── entities.py             #   Domain dataclasses (no deps)
 │   ├── interfaces.py           #   Generic IRepository ABC
 │   ├── config.py               #   DB engine + session
-│   └── infra/                  #   External implementations
-│       ├── __init__.py
-│       ├── repositories.py     #   Item SQLModel repository
-│       ├── order_repository.py #   Order SQLModel repository
-│       └── tag_repository.py   #   Tag SQLModel repository
+│   ├── item_repository.py      #   Item SQLModel repository
+│   ├── order_repository.py     #   Order SQLModel repository
+│   ├── tag_repository.py       #   Tag SQLModel repository
+│   └── infra/                  #   Reserved for external clients (LLM, Gitea, etc.)
 │
 ├── container.py                # DI wiring
 └── main.py                     # FastAPI entry point
