@@ -8,20 +8,24 @@ Create `<domain>/routes.py` and `<domain>/contracts.py`. Register the router in 
 
 ## Contracts
 
-Contracts convert between HTTP and domain. `to_entity()` on request DTOs, `from_entity()` on response DTOs. Never pass Pydantic models into the service layer.
+All contracts inherit `CamelModel` from `base.py` — serializes as camelCase for the frontend, accepts both camelCase and snake_case input. Never pass Pydantic models into the service layer.
+
+`to_entity()` on request DTOs, `from_entity()` on response DTOs.
 
 ```python
-class ThingCreate(BaseModel):
-    name: str
-    def to_entity(self) -> ThingData:
-        return ThingData(name=self.name)
+from app.api.base import CamelModel
 
-class ThingRead(BaseModel):
+class ThingCreate(CamelModel):
+    some_field: str  # accepts "someField" or "some_field"
+    def to_entity(self) -> ThingData:
+        return ThingData(some_field=self.some_field)
+
+class ThingRead(CamelModel):
     id: int
-    name: str
+    some_field: str  # serializes as "someField"
     @classmethod
     def from_entity(cls, thing: Thing) -> "ThingRead":
-        return cls(id=thing.id, name=thing.name)
+        return cls(id=thing.id, some_field=thing.some_field)
 ```
 
 ## Routes

@@ -1,15 +1,16 @@
+from app.api.base import CamelModel
 from app.data.entities import Tag, TagData
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 
-class TagCreate(BaseModel):
+class TagCreate(CamelModel):
     name: str = Field(description="Tag name")
 
     def to_entity(self) -> TagData:
         return TagData(name=self.name)
 
 
-class TagRead(BaseModel):
+class TagRead(CamelModel):
     id: int
     name: str
 
