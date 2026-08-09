@@ -1,6 +1,10 @@
 # API Tests
 
-Inherits `tests/CLAUDE.md`. API-specific examples below.
+Inherits `tests/CLAUDE.md`.
+
+The API uses a 3-layer architecture (api → service → data). Each layer boundary is a place where we made a decision — a mapping, a validation rule, an error code. Tests belong at those boundaries, asserting our decisions hold. They don't belong inside a layer verifying that the framework we delegated to still works.
+
+The service layer owns all business rules. Test validation, search, and orchestration logic there. The data layer is mostly delegation to SQLModel — only test it when a repository contains custom query logic. The api layer maps between HTTP and domain; test that our contracts serialize correctly and that our error codes match our intent.
 
 ## Wasteful vs worth it
 
