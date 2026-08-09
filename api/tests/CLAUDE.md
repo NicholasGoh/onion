@@ -10,6 +10,7 @@ Before writing a test, ask: if this fails, is the fix in our code or in a `pip i
 - **Vendor library behavior.** Don't test that Pydantic rejects `None`, that SQLModel round-trips a row, or that FastAPI returns 422 on bad input.
 - **Type system guarantees.** Don't assert a dataclass has fields or that an ABC raises `NotImplementedError`. Run type checkers in CI instead.
 - **Generated schema snapshots.** Don't snapshot OpenAPI output or migration SQL — these break on every library patch with zero signal.
+- **DI container resolution.** Don't assert `isinstance(container.service(), MyService)` — that tests the DI framework, not your logic. Wiring correctness belongs in integration tests (TestClient hitting real endpoints).
 
 ## Do test
 
@@ -55,6 +56,22 @@ def test_create_item_rejects_empty_name():
     service = ItemService(repository=fake_repo)
     with pytest.raises(ValueError, match="cannot be empty"):
         service.create_item(ItemData(name=""))
+```
+
+**Wasteful** — retests DI resolution:
+```python
+def test_container_resolves_service():
+    service = container.item_service()
+    assert isinstance(service, ItemService)
+```
+
+**Worth it** — integration test that wiring works:
+```python
+def test_create_and_get_item(client):
+    resp = client.post("/items/", json={"name": "Widget"})
+    item_id = resp.json()["id"]
+    resp = client.get(f"/items/{item_id}")
+    assert resp.json()["name"] == "Widget"
 ```
 
 **Wasteful** — retests enum definition:
