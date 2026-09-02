@@ -2,7 +2,7 @@ import os
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import SQLModel, create_engine
 
 from app.data.entities import Item, ItemData, Order, OrderData, Tag, TagData
 from app.data.interfaces import IRepository
@@ -107,31 +107,24 @@ def _ensure_database_exists(url: str) -> None:
 
 @pytest.fixture
 def client():
-    import app.data.config as config
-
     _ensure_database_exists(TEST_DATABASE_URL)
     test_engine = create_engine(TEST_DATABASE_URL, echo=True)
-
-    original_engine = config.engine
-    config.engine = test_engine
 
     SQLModel.metadata.drop_all(test_engine)
     SQLModel.metadata.create_all(test_engine)
 
-    def get_test_session():
-        with Session(test_engine) as session:
-            yield session
+    def get_test_engine():
+        yield test_engine
 
     from dependency_injector import providers
 
     from app.main import app, container
 
-    container.db_session.override(providers.Resource(get_test_session))
+    container.db_engine.override(providers.Resource(get_test_engine))
 
     with TestClient(app) as c:
         yield c
 
-    container.db_session.reset_override()
-    config.engine = original_engine
+    container.db_engine.reset_override()
     SQLModel.metadata.drop_all(test_engine)
     test_engine.dispose()

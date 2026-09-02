@@ -1,6 +1,7 @@
 from dependency_injector import containers, providers
+from sqlmodel import Session
 
-from app.data.config import get_session
+from app.data.config import get_engine
 from app.data.item_repository import ItemRepository
 from app.data.order_repository import OrderRepository
 from app.data.tag_repository import TagRepository
@@ -15,7 +16,8 @@ class Container(containers.DeclarativeContainer):
         modules=["app.api.items.routes", "app.api.orders.routes", "app.api.tags.routes"]
     )
 
-    db_session = providers.Resource(get_session)
+    db_engine = providers.Resource(get_engine)
+    db_session = providers.Factory(Session, bind=db_engine)
 
     item_repository = providers.Factory(ItemRepository, session=db_session)
     order_repository = providers.Factory(OrderRepository, session=db_session)
