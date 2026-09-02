@@ -10,7 +10,7 @@ Before writing a test, ask: if this fails, is the fix in our code or in a `pip i
 - **Vendor library behavior.** Don't test that Pydantic rejects `None`, that SQLModel round-trips a row, or that FastAPI returns 422 on bad input.
 - **Type system guarantees.** Don't assert a dataclass has fields or that an ABC raises `NotImplementedError`. Run type checkers in CI instead.
 - **Generated schema snapshots.** Don't snapshot OpenAPI output or migration SQL — these break on every library patch with zero signal.
-- **DI container resolution.** Don't assert `isinstance(container.service(), MyService)` — that tests the DI framework, not your logic. Wiring correctness belongs in integration tests (TestClient hitting real endpoints).
+- **DI provider construction.** Don't assert `isinstance(container.service(), MyService)` — that tests `providers.Factory` calling a constructor, which is the DI framework's job, not ours.
 
 ## Do test
 
@@ -20,6 +20,7 @@ Before writing a test, ask: if this fails, is the fix in our code or in a `pip i
 - Edge cases in search, filtering, or transformation logic
 - Integration tests that wiring works end-to-end (POST creates a retrievable item)
 - Error handling paths we chose (404 on missing, 400 on invalid)
+- **DI wiring** — that a route's `Provide[Container.x]` resolves to the provider we intended. Override the provider with a `MagicMock`, hit the route via `TestClient`, assert the mock was called. This catches a typo'd or swapped provider reference that a same-shaped real service would silently pass.
 
 Test the service layer for validation, search, and orchestration logic. Test the data layer only when a repository contains custom query logic. Test the api layer for contract serialization and error codes. Don't test inside a layer to verify the framework still works.
 
@@ -58,7 +59,7 @@ def test_create_item_rejects_empty_name():
         service.create_item(ItemData(name=""))
 ```
 
-**Wasteful** — retests DI resolution:
+**Wasteful** — retests provider construction:
 ```python
 def test_container_resolves_service():
     service = container.item_service()
@@ -72,6 +73,16 @@ def test_create_and_get_item(client):
     item_id = resp.json()["id"]
     resp = client.get(f"/items/{item_id}")
     assert resp.json()["name"] == "Widget"
+```
+
+**Worth it** — proves a route resolves to the intended provider:
+```python
+def test_items_route_wired_to_item_service():
+    mock_service = MagicMock(get_all=MagicMock(return_value=[]))
+    with container.item_service.override(mock_service):
+        with TestClient(app) as client:
+            client.get("/items/")
+    mock_service.get_all.assert_called_once()
 ```
 
 **Wasteful** — retests enum definition:
