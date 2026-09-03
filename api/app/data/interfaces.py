@@ -25,3 +25,21 @@ class IRepository(ABC, Generic[T, TCreate]):
 
 
 IItemRepository = IRepository["Item", "ItemData"]
+
+
+class IAuthClient(ABC):
+
+    @abstractmethod
+    def whoami(
+        self, cookie: str | None = None, token: str | None = None
+    ) -> "Session | None":
+        """Sync session check against either a browser session cookie or an
+        API client's session token - caller passes exactly one. Blocks the
+        calling thread - safe from sync routes (FastAPI threadpools them),
+        unsafe from async routes."""
+
+    @abstractmethod
+    async def awhoami(
+        self, cookie: str | None = None, token: str | None = None
+    ) -> "Session | None":
+        """Async session check. Awaits without blocking the event loop."""

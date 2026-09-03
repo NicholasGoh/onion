@@ -1,6 +1,7 @@
 from dependency_injector import containers, providers
 
-from app.data.config import get_engine, get_session
+from app.data.config import get_engine, get_session, settings
+from app.data.infra.kratos_client import KratosClient
 from app.data.item_repository import ItemRepository
 from app.data.order_repository import OrderRepository
 from app.data.tag_repository import TagRepository
@@ -22,6 +23,10 @@ class Container(containers.DeclarativeContainer):
 
     db_engine = providers.Resource(get_engine)
     db_session = providers.Resource(get_session, engine=db_engine)
+
+    kratos_client = providers.Singleton(
+        KratosClient, base_url=settings.kratos_public_url
+    )
 
     item_repository = providers.Factory(ItemRepository, session=db_session)
     order_repository = providers.Factory(OrderRepository, session=db_session)

@@ -37,3 +37,9 @@ class Tag:
 @dataclass
 class TagData:
     name: str
+
+
+@dataclass
+class Session:
+    id: str
+    identity_id: str

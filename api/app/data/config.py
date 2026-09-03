@@ -5,6 +5,8 @@ from sqlmodel import Session, SQLModel, create_engine
 class Settings(BaseSettings):
     database_url: str = "postgresql://postgres:postgres@postgres:5432/app"
     test_db_name: str = "test_app"
+    kratos_public_url: str = "http://kratos:4433"
+    csrf_secret: str = "insecure-dev-secret-change-in-production"
 
 
 settings = Settings()
