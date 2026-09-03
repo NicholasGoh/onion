@@ -1,3 +1,5 @@
+import time
+
 from app.data.entities import Order, OrderData
 from app.data.interfaces import IRepository
 from app.service.crud_service import CrudService
@@ -13,6 +15,10 @@ class OrderService(CrudService[Order, OrderData]):
     ):
         super().__init__(repository)
         self._item_service = item_service
+
+    def calculate_total(self, data: OrderData) -> int:
+        time.sleep(1)  # mocks a pricing/tax computation
+        return sum(data.quantity.get(item_id, 0) for item_id in data.item_ids)
 
     def create(self, data: OrderData) -> Order:
         if not data.item_ids:

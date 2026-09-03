@@ -11,6 +11,10 @@ class OrderCreate(CamelModel):
         return OrderData(item_ids=self.item_ids, quantity=self.quantity)
 
 
+class OrderQuote(CamelModel):
+    total: int
+
+
 class OrderRead(CamelModel):
     id: int
     item_ids: list[int]
