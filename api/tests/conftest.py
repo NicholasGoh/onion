@@ -10,7 +10,9 @@ from app.data.entities import Item, ItemData, Order, OrderData, Tag, TagData
 from app.data.interfaces import IRepository
 
 TEST_DB_NAME = os.getenv("TEST_DB_NAME", "test_app")
-TEST_DATABASE_URL = str(make_url(DATABASE_URL).set(database=TEST_DB_NAME))
+TEST_DATABASE_URL = make_url(DATABASE_URL).set(database=TEST_DB_NAME).render_as_string(
+    hide_password=False
+)
 
 
 # --- Fake repositories for unit tests ---
