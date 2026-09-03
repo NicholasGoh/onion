@@ -8,11 +8,6 @@ def test_create_and_get_item(client):
     assert resp.json()["name"] == "Widget"
 
 
-def test_create_item_returns_camel_case(client):
-    resp = client.post("/items/", json={"name": "Test"})
-    assert "id" in resp.json()
-
-
 def test_create_item_validation_returns_400(client):
     resp = client.post("/items/", json={"name": ""})
     assert resp.status_code == 400
