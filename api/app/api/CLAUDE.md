@@ -47,3 +47,14 @@ def create_thing(
 ```
 
 Map `ValueError` → 400, `None` returns → 404. Don't catch broad exceptions.
+
+## Authentication
+
+`authn` (`decorators.py`) is wired as a router-level dependency in `main.py`, not a per-route decorator - a new route can't be added to an authenticated router without authn by omission. Don't add `Depends(authn)` to individual routes; register the router correctly instead.
+
+Dual-transport, and both paths matter:
+
+- **API clients** send `X-Session-Token`. No CSRF check - browsers never auto-attach arbitrary headers cross-site, so there's no ambient-authority risk to defend against.
+- **Browser clients** send the Kratos session cookie, which travels automatically on cross-site requests - so it must be paired with `X-CSRF-Token`, checked via `_check_csrf`. This is api's own synchronizer token (HMAC over the session id, see `data/csrf.py`), not Kratos's `csrf_token` - Kratos's token only protects its own self-service flows (login/registration/settings), not routes downstream of authn.
+
+When adding a new authenticated route: if it only needs to support API/service clients, the token path is sufficient. If it's reachable from the browser app, both paths must keep working - don't special-case around `_check_csrf` for convenience.

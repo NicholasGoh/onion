@@ -45,3 +45,24 @@ class OrderService(CrudService[Order, OrderData]):
 ```
 
 Keep coupling unidirectional. If two services need each other, extract shared logic into a third.
+
+## CPU-bound methods
+
+Decorate CPU-bound (non-I/O) service methods with `@compute` (`decorators.py`) instead of making them `async def`. It gives callers a choice of transport instead of forcing one:
+
+- Sync route handler → call the method directly. FastAPI already runs sync routes in a threadpool, so this is fine as-is.
+- Async route handler → `await method.async_(...)`. This routes the call through a threadpool so the event loop isn't blocked.
+
+```python
+class ItemService(CrudService[Item, ItemData]):
+    @compute
+    def score(self, item: Item) -> float:
+        ...  # CPU-bound, no I/O
+
+# sync route
+service.score(item)
+# async route
+await service.score.async_(item)
+```
+
+Nothing enforces this at the type level - an async caller invoking `service.score(item)` directly will block the event loop instead of raising. There's no lint rule; catch it at review time. Don't reach for `@compute` on I/O-bound methods (repository calls, HTTP clients) - those should just be `async def` and awaited normally.
