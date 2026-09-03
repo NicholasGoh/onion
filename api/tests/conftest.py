@@ -2,15 +2,15 @@ import os
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.engine import make_url
 from sqlmodel import SQLModel, create_engine
 
+from app.data.config import DATABASE_URL
 from app.data.entities import Item, ItemData, Order, OrderData, Tag, TagData
 from app.data.interfaces import IRepository
 
-TEST_DATABASE_URL = os.getenv(
-    "TEST_DATABASE_URL",
-    "postgresql://postgres:postgres@postgres:5432/test_app",
-)
+TEST_DB_NAME = os.getenv("TEST_DB_NAME", "test_app")
+TEST_DATABASE_URL = str(make_url(DATABASE_URL).set(database=TEST_DB_NAME))
 
 
 # --- Fake repositories for unit tests ---
