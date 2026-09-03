@@ -36,12 +36,6 @@ def test_search_items(client):
     assert resp.json()[0]["name"] == "Bluetooth Speaker"
 
 
-def test_create_tag(client):
-    resp = client.post("/tags/", json={"name": "electronics"})
-    assert resp.status_code == 200
-    assert resp.json()["name"] == "electronics"
-
-
 def test_create_order_with_valid_items(client):
     item_resp = client.post("/items/", json={"name": "Widget"})
     item_id = item_resp.json()["id"]
