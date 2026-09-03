@@ -1,42 +1,20 @@
-from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, HTTPException
+from dependency_injector.wiring import Provide
 
+from app.api.crud_router import add_get_by_id, make_crud_router
 from app.api.orders.contracts import OrderCreate, OrderRead
 from app.container import Container
-from app.service.order_service import OrderService
 
-router = APIRouter(prefix="/orders", tags=["orders"])
+router = make_crud_router(
+    prefix="/orders",
+    tag="orders",
+    create_dto=OrderCreate,
+    read_dto=OrderRead,
+    service_provider=Provide[Container.order_service],
+)
 
-
-@router.post("/", response_model=OrderRead)
-@inject
-def create_order(
-    order: OrderCreate,
-    service: OrderService = Depends(Provide[Container.order_service]),
-):
-    try:
-        domain_order = service.create(order.to_entity())
-        return OrderRead.from_entity(domain_order)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@router.get("/{order_id}", response_model=OrderRead)
-@inject
-def get_order(
-    order_id: int,
-    service: OrderService = Depends(Provide[Container.order_service]),
-):
-    domain_order = service.get(order_id)
-    if not domain_order:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return OrderRead.from_entity(domain_order)
-
-
-@router.get("/", response_model=list[OrderRead])
-@inject
-def get_orders(
-    service: OrderService = Depends(Provide[Container.order_service]),
-):
-    domain_orders = service.get_all()
-    return [OrderRead.from_entity(order) for order in domain_orders]
+add_get_by_id(
+    router,
+    tag="orders",
+    read_dto=OrderRead,
+    service_provider=Provide[Container.order_service],
+)

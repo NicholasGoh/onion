@@ -12,7 +12,12 @@ from app.service.order_service import OrderService
 class Container(containers.DeclarativeContainer):
 
     wiring_config = containers.WiringConfiguration(
-        modules=["app.api.items.routes", "app.api.orders.routes", "app.api.tags.routes"]
+        modules=[
+            "app.api.crud_router",
+            "app.api.items.routes",
+            "app.api.orders.routes",
+            "app.api.tags.routes",
+        ]
     )
 
     db_engine = providers.Resource(get_engine)
