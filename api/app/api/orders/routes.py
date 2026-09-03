@@ -1,11 +1,9 @@
 from dependency_injector.wiring import Provide, inject
-from fastapi import Depends, Request
+from fastapi import Depends
 
 from app.api.crud_router import add_get_by_id, make_crud_router
-from app.api.decorators import authn
 from app.api.orders.contracts import OrderCreate, OrderQuote, OrderRead
 from app.container import Container
-from app.data.interfaces import IAuthClient
 from app.service.order_service import OrderService
 
 router = make_crud_router(
@@ -26,11 +24,8 @@ add_get_by_id(
 
 @router.post("/quote", response_model=OrderQuote)
 @inject
-@authn
 def quote_order(
-    request: Request,
     order: OrderCreate,
-    auth_client: IAuthClient = Depends(Provide[Container.kratos_client]),
     service: OrderService = Depends(Provide[Container.order_service]),
 ):
     total = service.calculate_total(order.to_entity())

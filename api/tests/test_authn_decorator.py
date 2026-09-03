@@ -60,115 +60,63 @@ def csrf_secret(monkeypatch):
     monkeypatch.setattr("app.api.decorators.settings.csrf_secret", CSRF_SECRET)
 
 
-def test_sync_route_rejects_missing_credentials():
-    @authn
-    def route(request: Request, auth_client: IAuthClient):
-        return "ok"
+def _call(**kwargs):
+    return asyncio.run(authn.__wrapped__(**kwargs))
 
+
+def test_rejects_missing_credentials():
     with pytest.raises(HTTPException) as exc_info:
-        route(request=_make_request(), auth_client=FakeAuthClient())
+        _call(request=_make_request(), auth_client=FakeAuthClient())
     assert exc_info.value.status_code == 401
 
 
-def test_sync_route_rejects_invalid_cookie():
-    @authn
-    def route(request: Request, auth_client: IAuthClient):
-        return "ok"
-
+def test_rejects_invalid_cookie():
     with pytest.raises(HTTPException) as exc_info:
-        route(request=_make_request(cookie="wrong"), auth_client=FakeAuthClient())
+        _call(request=_make_request(cookie="wrong"), auth_client=FakeAuthClient())
     assert exc_info.value.status_code == 401
 
 
-def test_sync_route_rejects_valid_cookie_without_csrf():
-    @authn
-    def route(request: Request, auth_client: IAuthClient):
-        return "ok"
-
+def test_rejects_valid_cookie_without_csrf():
     with pytest.raises(HTTPException) as exc_info:
-        route(request=_make_request(cookie="valid-cookie"), auth_client=FakeAuthClient())
+        _call(request=_make_request(cookie="valid-cookie"), auth_client=FakeAuthClient())
     assert exc_info.value.status_code == 403
 
 
-def test_sync_route_rejects_valid_cookie_with_wrong_csrf():
-    @authn
-    def route(request: Request, auth_client: IAuthClient):
-        return "ok"
-
+def test_rejects_valid_cookie_with_wrong_csrf():
     with pytest.raises(HTTPException) as exc_info:
-        route(
+        _call(
             request=_make_request(cookie="valid-cookie", csrf_token="wrong-token"),
             auth_client=FakeAuthClient(),
         )
     assert exc_info.value.status_code == 403
 
 
-def test_sync_route_passes_valid_cookie_with_valid_csrf():
-    @authn
-    def route(request: Request, auth_client: IAuthClient):
-        return "ok"
+def test_rejects_valid_cookie_with_csrf_token_bound_to_other_session():
+    other_session_csrf_token = generate_csrf_token("session-2", CSRF_SECRET)
+    with pytest.raises(HTTPException) as exc_info:
+        _call(
+            request=_make_request(cookie="valid-cookie", csrf_token=other_session_csrf_token),
+            auth_client=FakeAuthClient(),
+        )
+    assert exc_info.value.status_code == 403
 
-    result = route(
+
+def test_passes_valid_cookie_with_valid_csrf():
+    session = _call(
         request=_make_request(cookie="valid-cookie", csrf_token=VALID_CSRF_TOKEN),
         auth_client=FakeAuthClient(),
     )
-    assert result == "ok"
+    assert session == VALID_SESSION
 
 
-def test_sync_route_rejects_invalid_session_token():
-    @authn
-    def route(request: Request, auth_client: IAuthClient):
-        return "ok"
-
+def test_rejects_invalid_session_token():
     with pytest.raises(HTTPException) as exc_info:
-        route(request=_make_request(session_token="wrong"), auth_client=FakeAuthClient())
+        _call(request=_make_request(session_token="wrong"), auth_client=FakeAuthClient())
     assert exc_info.value.status_code == 401
 
 
-def test_sync_route_passes_valid_session_token_without_csrf():
-    @authn
-    def route(request: Request, auth_client: IAuthClient):
-        return "ok"
-
-    result = route(
+def test_passes_valid_session_token_without_csrf():
+    session = _call(
         request=_make_request(session_token="valid-token"), auth_client=FakeAuthClient()
     )
-    assert result == "ok"
-
-
-def test_async_route_rejects_missing_credentials():
-    @authn
-    async def route(request: Request, auth_client: IAuthClient):
-        return "ok"
-
-    with pytest.raises(HTTPException) as exc_info:
-        asyncio.run(route(request=_make_request(), auth_client=FakeAuthClient()))
-    assert exc_info.value.status_code == 401
-
-
-def test_async_route_passes_valid_session_token():
-    @authn
-    async def route(request: Request, auth_client: IAuthClient):
-        return "ok"
-
-    result = asyncio.run(
-        route(
-            request=_make_request(session_token="valid-token"),
-            auth_client=FakeAuthClient(),
-        )
-    )
-    assert result == "ok"
-
-
-def test_async_route_passes_valid_cookie_with_valid_csrf():
-    @authn
-    async def route(request: Request, auth_client: IAuthClient):
-        return "ok"
-
-    result = asyncio.run(
-        route(
-            request=_make_request(cookie="valid-cookie", csrf_token=VALID_CSRF_TOKEN),
-            auth_client=FakeAuthClient(),
-        )
-    )
-    assert result == "ok"
+    assert session == VALID_SESSION

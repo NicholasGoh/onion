@@ -15,6 +15,7 @@ class Container(containers.DeclarativeContainer):
     wiring_config = containers.WiringConfiguration(
         modules=[
             "app.api.crud_router",
+            "app.api.decorators",
             "app.api.items.routes",
             "app.api.orders.routes",
             "app.api.tags.routes",

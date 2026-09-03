@@ -119,13 +119,28 @@ def client():
 
     from dependency_injector import providers
 
+    from app.api.decorators import authn
+    from app.data.entities import Session
     from app.main import app, container
 
     container.db_engine.override(providers.Resource(get_test_engine))
+    app.dependency_overrides[authn] = lambda: Session(id="test-session", identity_id="test-user")
 
     with TestClient(app) as c:
         yield c
 
+    app.dependency_overrides.pop(authn, None)
     container.db_engine.reset_override()
     SQLModel.metadata.drop_all(test_engine)
     test_engine.dispose()
+
+
+@pytest.fixture
+def authn_client(client):
+    """Like `client`, but exercises the real authn dependency instead of
+    the default test bypass - for tests asserting on auth behavior itself."""
+    from app.api.decorators import authn
+    from app.main import app
+
+    app.dependency_overrides.pop(authn, None)
+    yield client
