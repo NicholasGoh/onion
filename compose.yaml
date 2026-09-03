@@ -36,7 +36,8 @@ services:
       dockerfile: ./ui/Dockerfile
     ports:
       - "3000:3000"
+    entrypoint: npm run dev
     volumes:
       - ./:/app
-      - /app/node_modules
+      - /app/ui/node_modules
       - ~/.claude:/app/.claude
