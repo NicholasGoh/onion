@@ -22,6 +22,15 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.container = container
 
+
+@app.middleware("http")
+async def scope_db_session(request, call_next):
+    try:
+        return await call_next(request)
+    finally:
+        container.db_session.shutdown()
+
+
 app.include_router(item_routes.router)
 app.include_router(order_routes.router)
 app.include_router(tag_routes.router)

@@ -14,20 +14,24 @@ DATABASE_URL = settings.database_url
 
 
 def get_engine():
-    engine = create_engine(DATABASE_URL, echo=True)
+    engine = create_engine(
+        DATABASE_URL,
+        echo=True,
+        pool_size=10,
+        max_overflow=20,
+        pool_pre_ping=True,
+    )
     yield engine
     engine.dispose()
 
 
 def get_session(engine):
-    session = Session(engine)
-    try:
-        yield session
-    except Exception:
-        session.rollback()
-        raise
-    finally:
-        session.close()
+    with Session(engine) as session:
+        try:
+            yield session
+        except Exception:
+            session.rollback()
+            raise
 
 
 def create_db_and_tables(engine):
