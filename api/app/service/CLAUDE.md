@@ -1,5 +1,9 @@
 # Service Layer
 
+## CrudService
+
+`CrudService[T, TCreate]` wraps an `IRepository[T, TCreate]` and exposes the four CRUD operations (`create`, `get`, `get_all`, `delete`) by delegating straight to the repository. It carries no business logic of its own - it exists so pure-CRUD domains don't need a bespoke service class, and so services with real logic have a base to extend.
+
 ## When to create a service
 
 | Scenario | What to use |
