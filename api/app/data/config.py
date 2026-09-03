@@ -1,10 +1,14 @@
-import os
-
+from pydantic_settings import BaseSettings
 from sqlmodel import Session, SQLModel, create_engine
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL", "postgresql://postgres:postgres@postgres:5432/app"
-)
+
+class Settings(BaseSettings):
+    database_url: str = "postgresql://postgres:postgres@postgres:5432/app"
+    test_db_name: str = "test_app"
+
+
+settings = Settings()
+DATABASE_URL = settings.database_url
 
 
 def get_engine():

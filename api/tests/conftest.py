@@ -1,17 +1,16 @@
-import os
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.engine import make_url
 from sqlmodel import SQLModel, create_engine
 
-from app.data.config import DATABASE_URL
+from app.data.config import settings
 from app.data.entities import Item, ItemData, Order, OrderData, Tag, TagData
 from app.data.interfaces import IRepository
 
-TEST_DB_NAME = os.getenv("TEST_DB_NAME", "test_app")
-TEST_DATABASE_URL = make_url(DATABASE_URL).set(database=TEST_DB_NAME).render_as_string(
-    hide_password=False
+TEST_DATABASE_URL = (
+    make_url(settings.database_url)
+    .set(database=settings.test_db_name)
+    .render_as_string(hide_password=False)
 )
 
 
