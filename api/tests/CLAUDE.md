@@ -1,5 +1,19 @@
 # API Tests
 
+## Layout
+
+```
+tests/
+├── conftest.py       # shared fixtures (fakes, client, authn_client) — visible to both dirs
+├── unit/              # service logic, decorators, csrf — no DB, no container
+└── integration/        # container + real DB via TestClient — wiring, end-to-end routes
+```
+
+`unit/` = fast, isolated, constructs services/functions directly (see "Do test" below — fake
+repos, not the container). `integration/` = goes through `app.main.container` and a real
+Postgres test DB. If a test needs `client` or `authn_client`, it's integration; if it only
+imports from `app.service`/`app.data`/`app.api.decorators` and builds fakes, it's unit.
+
 Every line in this repo is liability — including tests. A test should only exist if it guards a decision made in this codebase.
 
 Before writing a test, ask: if this fails, is the fix in our code or in a `pip install` / `npm install`? If the fix is an upgrade, don't write the test.
