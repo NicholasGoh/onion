@@ -10,12 +10,11 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-DATABASE_URL = settings.database_url
 
 
 def get_engine():
     engine = create_engine(
-        DATABASE_URL,
+        settings.database_url,
         echo=True,
         pool_size=10,
         max_overflow=20,
